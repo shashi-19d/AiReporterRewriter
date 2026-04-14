@@ -5,7 +5,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="AI\" />
     <Folder Include="Persistence\" />
   </ItemGroup>
 
