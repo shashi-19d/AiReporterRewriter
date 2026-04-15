@@ -11,7 +11,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Dependency Injection
-builder.Services.AddScoped<IAIService, MockAIService>();
+// builder.Services.AddScoped<IAIService, MockAIService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+
+builder.Services.AddHttpClient<IAIService, HuggingFaceService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 
 var app = builder.Build();
