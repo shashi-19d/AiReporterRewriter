@@ -4,13 +4,12 @@ public class FinancialReport
 {
     public Guid Id { get; set; }
 
-    public string OriginalContent { get; set; }
+    public required string OriginalContent { get; set; }
 
-    public string RewrittenContent { get; set; }
+    public required string RewrittenContent { get; set; }
 
-    public string Summary { get; set; }
+    public required string Summary { get; set; }
+    public required string Tone { get; set; }
 
-    public string Tone { get; set; }
-
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
