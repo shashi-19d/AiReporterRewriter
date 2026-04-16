@@ -16,16 +16,26 @@ public class ReportService : IReportService
 
     public async Task<RewriteReportResponseDto> ProcessReportAsync(RewriteReportRequestDto request)
     {
-        var rewrittenJson = await _aiService.RewriteAsync(request.Content, request.Tone);
-        var summaryJson = await _aiService.SummarizeAsync(request.Content);
-
-        var rewrittenDoc = JsonDocument.Parse(rewrittenJson);
-        var summaryDoc = JsonDocument.Parse(summaryJson);
+        var rewrittenText = await _aiService.RewriteAsync(request.Content, request.Tone);
+        var summaryText = await _aiService.SummarizeAsync(request.Content);
 
         return new RewriteReportResponseDto
         {
-            RewrittenContent = rewrittenDoc.RootElement.GetProperty("rewrittenContent").GetString(),
-            Summary = summaryDoc.RootElement.GetProperty("summary").GetString()
+            RewrittenContent = CleanText(rewrittenText),
+            Summary = CleanText(summaryText)
         };
+    }
+
+    private string CleanText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return "";
+
+        if (text.Contains(":"))
+        {
+            text = text.Substring(text.LastIndexOf(":") + 1);
+        }
+
+        return text.Trim();
     }
 }
