@@ -19,31 +19,48 @@ public class HuggingFaceService : IAIService
 
     public async Task<string> RewriteAsync(string content, string tone)
     {
-        var prompt = $"Summarize and rewrite the following financial text in a {tone} tone:\n\n{content}";
+        var prompt = $@"Rewrite the following financial report in a {tone} tone.
+                        Return ONLY valid JSON in this format:
+                        {{
+                          ""rewrittenContent"": ""...""
+                        }}
+                        Text:{content}";
+
         return await CallAI(prompt);
     }
 
     public async Task<string> SummarizeAsync(string content)
     {
-        var prompt = $"Provide a concise summary of the following financial report:\n\n{content}";
+        var prompt = $@"Summarize the following financial report.
+                        Return ONLY valid JSON in this format:
+                        {{
+                          ""summary"": ""...""
+                        }}
+                        Text:{content}";
+
         return await CallAI(prompt);
     }
 
     private async Task<string> CallAI(string prompt)
     {
         var url = "https://router.huggingface.co/hf-inference/models/facebook/bart-large-cnn";
+
         var request = new HttpRequestMessage(HttpMethod.Post, url);
+
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+
         var requestBody = new
         {
             inputs = prompt
         };
+
         request.Content = new StringContent(
-                    JsonSerializer.Serialize(requestBody),
-                    Encoding.UTF8,
-                    "application/json");
+            JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json");
 
         var response = await _httpClient.SendAsync(request);
+
         var responseContent = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
@@ -52,14 +69,16 @@ public class HuggingFaceService : IAIService
         }
 
         using var jsonDoc = JsonDocument.Parse(responseContent);
+
         var root = jsonDoc.RootElement;
 
         if (root.ValueKind == JsonValueKind.Array)
         {
             var firstItem = root[0];
+
             if (firstItem.TryGetProperty("summary_text", out var summary))
             {
-                return summary.GetString() ?? "No response";
+                return summary.GetString() ?? "";
             }
         }
 
