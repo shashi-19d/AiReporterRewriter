@@ -2,6 +2,9 @@ using AIReportRewriter.Application.Interfaces;
 using AIReportRewriter.Application.Features.Reports.Interfaces;
 using AIReportRewriter.Application.Features.Reports.Services;
 using AIReportRewriter.Infrastructure.AI;
+using AIReportRewriter.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,12 @@ builder.Services.AddScoped<IReportService, ReportService>();
 
 builder.Services.AddHttpClient<IAIService, HuggingFaceService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
 var app = builder.Build();
 
