@@ -33,46 +33,58 @@ public class HuggingFaceService : IAIService
 
     private async Task<string> CallAI(string prompt)
     {
-        var url = "https://router.huggingface.co/hf-inference/models/facebook/bart-large-cnn";
+        int maxRetries = 3;
+        int delayMs = 1000;
 
-        var request = new HttpRequestMessage(HttpMethod.Post, url);
-
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-
-        var requestBody = new
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
-            inputs = prompt
-        };
-
-        request.Content = new StringContent(
-            JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json");
-
-        var response = await _httpClient.SendAsync(request);
-
-        var responseContent = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new Exception($"HuggingFace Error: {responseContent}");
-        }
-
-        using var jsonDoc = JsonDocument.Parse(responseContent);
-
-        var root = jsonDoc.RootElement;
-
-        if (root.ValueKind == JsonValueKind.Array)
-        {
-            var firstItem = root[0];
-
-            if (firstItem.TryGetProperty("summary_text", out var summary))
+            try
             {
-                return summary.GetString() ?? "";
+                var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    "https://router.huggingface.co/hf-inference/models/facebook/bart-large-cnn");
+
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", _apiKey);
+
+                var requestBody = new
+                {
+                    inputs = prompt
+                };
+
+                request.Content = new StringContent(
+                    JsonSerializer.Serialize(requestBody),
+                    Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"HF Error: {error}");
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                using var jsonDoc = JsonDocument.Parse(responseContent);
+
+                return jsonDoc.RootElement[0]
+                    .GetProperty("summary_text")
+                    .GetString() ?? "No response";
+            }
+            catch (Exception ex)
+            {
+                if (attempt == maxRetries)
+                    throw;
+
+                await Task.Delay(delayMs * attempt);
+
+                Console.WriteLine($"Retry {attempt} failed: {ex.Message}");
             }
         }
 
-        return responseContent;
+        throw new Exception("AI call failed after retries");
     }
 
 }

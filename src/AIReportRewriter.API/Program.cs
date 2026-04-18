@@ -1,6 +1,7 @@
-using AIReportRewriter.Application.Interfaces;
+using AIReportRewriter.API.Middleware;
 using AIReportRewriter.Application.Features.Reports.Interfaces;
 using AIReportRewriter.Application.Features.Reports.Services;
+using AIReportRewriter.Application.Interfaces;
 using AIReportRewriter.Infrastructure.AI;
 using AIReportRewriter.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers(); 
+app.MapControllers();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.Run();
