@@ -19,24 +19,14 @@ public class HuggingFaceService : IAIService
 
     public async Task<string> RewriteAsync(string content, string tone)
     {
-        var prompt = $@"Rewrite the following financial report in a {tone} tone.
-                        Return ONLY valid JSON in this format:
-                        {{
-                          ""rewrittenContent"": ""...""
-                        }}
-                        Text:{content}";
+        var prompt = $@"Rewrite the financial report in {tone} tone. ONLY return the final rewritten sentence. DO NOT repeat instructions. Text:{content}";
 
         return await CallAI(prompt);
     }
 
     public async Task<string> SummarizeAsync(string content)
     {
-        var prompt = $@"Summarize the following financial report.
-                        Return ONLY valid JSON in this format:
-                        {{
-                          ""summary"": ""...""
-                        }}
-                        Text:{content}";
+        var prompt = $@"Summarize the following financial report in one short sentence. ONLY return the summary. Text:{content}";
 
         return await CallAI(prompt);
     }

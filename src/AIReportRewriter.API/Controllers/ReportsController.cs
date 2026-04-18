@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using AIReportRewriter.Application.Features.Reports.DTOs;
+﻿using AIReportRewriter.Application.Features.Reports.DTOs;
 using AIReportRewriter.Application.Features.Reports.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AIReportRewriter.API.Controllers;
 
@@ -19,6 +19,10 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> RewriteReport([FromBody] RewriteReportRequestDto request)
     {
         var result = await _reportService.ProcessReportAsync(request);
-        return Ok(result);
+        return Ok(new
+        {
+            success = true,
+            data = result
+        });
     }
 }
