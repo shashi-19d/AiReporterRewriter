@@ -37,6 +37,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddMemoryCache();
 
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("fixed", config =>

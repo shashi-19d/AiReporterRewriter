@@ -97,4 +97,36 @@ public class ReportService : IReportService
 
         return firstSentence?.Trim() + ".";
     }
+
+    public async Task<PagedResponse<RewriteReportResponseDto>> GetReportsAsync(GetReportsQuery query)
+    {
+        var (reports, total) = await _repository.GetPagedAsync(query.PageNumber, query.PageSize, query.Tone);
+
+        var data = reports.Select(r => new RewriteReportResponseDto
+        {
+            RewrittenContent = r.RewrittenContent,
+            Summary = r.Summary
+        });
+
+        return new PagedResponse<RewriteReportResponseDto>
+        {
+            Data = data,
+            PageNumber = query.PageNumber,
+            PageSize = query.PageSize,
+            TotalRecords = total
+        };
+    }
+
+    public async Task<RewriteReportResponseDto?> GetByIdAsync(int id)
+    {
+        var report = await _repository.GetByIdAsync(id);
+
+        if (report == null) return null;
+
+        return new RewriteReportResponseDto
+        {
+            RewrittenContent = report.RewrittenContent,
+            Summary = report.Summary
+        };
+    }
 }
