@@ -52,12 +52,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection(); 
 
-
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseRateLimiter();
 
