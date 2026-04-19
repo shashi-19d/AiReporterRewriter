@@ -5,6 +5,8 @@ using AIReportRewriter.Application.Interfaces;
 using AIReportRewriter.Infrastructure.AI;
 using AIReportRewriter.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +30,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddMemoryCache();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("fixed", config =>
+    {
+        config.PermitLimit = 5; // max 5 requests
+        config.Window = TimeSpan.FromSeconds(10); // per 10 sec
+        config.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        config.QueueLimit = 2;
+    });
+});
+
 var app = builder.Build();
 
 // Middleware
@@ -45,5 +58,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseRateLimiter();
 
 app.Run();

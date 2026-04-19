@@ -1,9 +1,11 @@
 ﻿using AIReportRewriter.Application.Features.Reports.DTOs;
 using AIReportRewriter.Application.Features.Reports.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace AIReportRewriter.API.Controllers;
 
+[EnableRateLimiting("fixed")]
 [ApiController]
 [Route("api/[controller]")]
 public class ReportsController : ControllerBase
