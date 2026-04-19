@@ -24,7 +24,7 @@ public class ReportService : IReportService
 
     public async Task<RewriteReportResponseDto> ProcessReportAsync(RewriteReportRequestDto request)
     {
-        _logger.LogInformation("Processing report request");
+        _logger.LogInformation("Processing report for Tone: {Tone}", request.Tone);
 
         // STEP A: Create cache key
         var cacheKey = $"{request.Content}_{request.Tone}";

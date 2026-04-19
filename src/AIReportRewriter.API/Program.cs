@@ -4,14 +4,21 @@ using AIReportRewriter.Application.Features.Reports.Services;
 using AIReportRewriter.Application.Interfaces;
 using AIReportRewriter.Infrastructure.AI;
 using AIReportRewriter.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Threading.RateLimiting;
 
 
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+builder.Host.UseSerilog();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -55,6 +62,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
